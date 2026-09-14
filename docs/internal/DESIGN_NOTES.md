@@ -962,21 +962,19 @@ These are boundaries, not rejected-after-deliberation alternatives — they reco
 
 This section holds **cross-cutting deferred approaches** not owned by any single decision above. Per-decision alternatives live in each entry's "Alternatives considered" field; this is the place for approaches that span multiple sections or sit outside the prototype's current model.
 
-### 11.1 PLUS / CLUE / LCM — land-use simulation models
+### 11.1 PLUS — selected production land-change simulator
 
-**Considered.** NatCap's project document lists three land-use change simulation models alongside the prototype's three-layer placement mask:
+**Decision.** Adopt PLUS as the production engine for a new, offline **future-background LULC** branch. PLUS generates conditional BAU and policy-constrained land-change projections; the current Explorer engine continues to place deliberate planner interventions. The two outputs meet only through the canonical scenario adapter and downstream Urban InVEST evaluation. The complete workflow contract lives in `PLUS_PRODUCTION_WORKFLOW.md`.
 
-- **CLUE** (Conversion of Land Use and its Effects) — biophysical land-change modeler, established early 2000s, Java-based.
-- **PLUS** (Patch-generating Land Use Simulation) — ML-based, recent, open-source from HPSCIL at China University of Geosciences; standalone C++ Qt application.
-- **LCM** (Land Change Modeler) — proprietary, part of TerrSet.
+**Why.** PLUS combines nonlinear transition-rule learning (LEAS / Random Forest) with a patch-generating cellular automaton (CARS), a strong fit for urban expansion and landscape-pattern change. The project lead has direct confirmation from the PLUS lead author that the model is open source. Until a repository or release license artifact is available, cite that status as personal communication and keep redistribution behind a packaging gate.
 
-**Why deferred.** These models answer a different question than the prototype is set up for. They project *what will happen* given historical drivers and trends — useful for "what does the AOI look like in 30 years if current trends continue?" The prototype asks *what should happen if planners intervene* — a different question that doesn't map cleanly onto status-quo projections.
+**Alternatives considered.** CLUE remains the pilot's transparent structural comparator because it separates areal demand, suitability, conversion rules, and neighborhood effects. TerrSet Land Change Modeler is now freeware but remains closed source and Windows-bound; retain it only as an optional analyst-operated replication environment. Keeping the current random/weighted placement engine alone would not provide a future without-intervention baseline.
 
-That said, they're in NatCap's recommendation list because they're expected to add value. Future phases may incorporate one or more for: baseline-without-intervention projections (status-quo scenarios); learning placement patterns from historical land-use change; comparing planner interventions against business-as-usual.
+**Consequences.** PLUS is not called during a Streamlit rerun. A versioned, out-of-process run produces immutable native output, a canonical project-taxonomy raster, model-specific InVEST views, QC, and a complete manifest. Predictive (`plus_bau` / `plus_policy`) and normative (`planner_intervention`) provenance remain distinct. A three-period hindcast, seed ensemble, transition/patch validation, crosswalk audit, and canonical InVEST execution are release gates.
 
-**Specific operational concerns.** PLUS is a standalone C++ Qt application, not a Python library — integration would require subprocess execution or substantial reimplementation. CLUE is Java-based with similar deployment issues. LCM is proprietary, can't ship in an open-source prototype.
+**Revisit if.** PLUS cannot be built or automated reproducibly; its hindcast does not outperform persistence and quantity-correct random allocation on change-specific metrics; the applicable license cannot support the intended deployment; or a comparator materially and consistently outperforms it.
 
-**Revisit if.** A status-quo projection becomes a prototype goal (e.g. for the "without-intervention" baseline a future climate-impact phase might need).
+**Code touchpoints.** Planned adapter and provenance work only; none has shipped. See `PLUS_PRODUCTION_WORKFLOW.md` §12 and `OPEN_QUESTIONS.md` §3.2.
 
 ### 11.2 Wallpaper approach — interpretation uncertain
 
@@ -984,9 +982,9 @@ NatCap's project document lists "wallpaper" alongside the three-layer mask as a 
 
 **To clarify with NatCap.** Tracked in NATCAP_COLLABORATION as a clarifying ask. Whether the prototype should pursue this as an option depends on the answer.
 
-### 11.3 NatCap ROOT — multi-objective optimization
+### 11.3 NatCap ROOT — optional second-stage optimization
 
-**Considered.** NatCap's ROOT (Restoration Opportunities Optimization Tool) is a linear-programming-based multi-objective optimization tool for spatial decision-making. It maximizes weighted sums of objectives (`max Σ wᵢ Vᵢₛₐ xₛₐ`) over spatial decision units (SDUs), producing true Pareto frontiers (production possibility frontiers) and agreement maps.
+**Considered.** NatCap's ROOT (Restoration Opportunities Optimization Tool) is an Apache-licensed Python/InVEST-plugin, linear-programming-based multi-objective tool for spatial decisions. It maximizes weighted sums of objectives (`max Σ wᵢ Vᵢₛₐ xₛₐ`) over spatial decision units (SDUs), producing production possibility frontiers and agreement maps.
 
 **What ROOT does that the prototype doesn't.**
 - True LP-based Pareto optimization at the SDU level — guarantees mathematically optimal solutions on the feasibility frontier, not heuristic approximations.
@@ -994,11 +992,11 @@ NatCap's project document lists "wallpaper" alongside the three-layer mask as a 
 - Cost-as-factor optimization — costs can enter the optimization as constraints or factors, not just as post-hoc ratios.
 - Operates on rasterized factor layers without requiring a precomputed scenario grid.
 
-**Why the prototype uses a surrogate-based optimizer instead.** ROOT is a desktop optimization tool designed for analyst workflows — runs take minutes to hours, results are produced for offline analysis. The prototype is an interactive dashboard where slider responses need to be millisecond-fast. A Random Forest surrogate over the four scenario sliders, trained on a precomputed scenario grid, enables interactive scenario exploration at the cost of giving up true Pareto optimization.
+**Why ROOT stays outside the first PLUS production increment.** ROOT is an analyst workflow, while the prototype needs millisecond-fast interaction. More importantly, ROOT solves the normative intervention problem rather than PLUS's predictive land-change problem. UCM, UNA, and UMH also contain spatial interactions that a simple additive per-SDU impact table cannot fully preserve; shortlisted portfolios still require complete InVEST reruns.
 
 **"Not pursued" means different tool, not wrong tool.** ROOT is the right tool for analyst-driven offline optimization with strong guarantees. The prototype's surrogate is the right tool for interactive sandbox exploration. Adopting ROOT would mean re-architecting the prototype around a different user model — not a correctness fix to the current architecture. ARCHITECTURE §10's "Why not ROOT" carries the one-paragraph framing; this entry holds the deferred-approach rationale and the cross-document pointer.
 
-**Revisit if.** A future workstream needs true LP-based Pareto frontiers or agreement maps — at which point ROOT becomes a candidate for an offline analyst-mode export, not an in-app replacement.
+**Revisit if.** The PLUS future-background branch passes validation and a funded workstream needs budget-constrained activity portfolios, true LP-based frontiers, or agreement maps. ROOT would then be an offline second stage, not a replacement for PLUS or the interactive app.
 
 ### 11.4 Stratified Impervious Siting (per-NLCD-intensity placement control)
 

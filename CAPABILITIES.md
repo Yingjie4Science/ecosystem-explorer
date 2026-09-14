@@ -78,6 +78,7 @@ Urban land-use tradeoff prototype · San Antonio + Minneapolis · canonical-InVE
 - CSV download for comparison table
 
 ## Not yet / on the radar
+- **PLUS future-background scenarios** — approved offline production workflow for conditional BAU and policy-constrained LULC projections; Phase 0 source/build/data audit is next
 - **Children's nature access as an optimization target** — surface alongside the current reported children's metric so users can search for mixes that maximize it directly (the school-point readout — Nature Access at Schools — has shipped; this is the optimization companion to it)
 - AlphaEarth-derived land-cover inputs
 - Pixel-level spatial optimization

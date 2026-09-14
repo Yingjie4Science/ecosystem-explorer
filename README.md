@@ -60,6 +60,7 @@ Each question has one source of truth — if you're unsure where something belon
 | What is the running log of NatCap asks, gaps, and decisions? | `docs/internal/NATCAP_COLLABORATION.md` |
 | What data exists? | `docs/internal/DATA_INVENTORY.md` |
 | What is still unresolved? | `docs/internal/OPEN_QUESTIONS.md` |
+| How will PLUS generate and validate future land-use baselines? | `docs/internal/PLUS_PRODUCTION_WORKFLOW.md` |
 | What do I say in a demo or meeting? | `docs/internal/DEMO_AND_COLLABORATION.md` |
 | How do I set up and run validation/contribution workflows? | `docs/dev/CONTRIBUTING.md` |
 | How should a Claude session work in this repo? | `CLAUDE.md` (repo root) |

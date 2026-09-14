@@ -89,8 +89,8 @@ NatCap collaborator notes (`data/sa/natcap_2024/Ecosystem_Explorer_-_Meeting_Not
 | San Antonio as full pilot (six-model SA project scope) | Active NatCap research direction | 🔄 In progress | SA NatCap data integration (Briefs 27–31) is complete for five of six models; NDR pending DEM + watersheds. The prototype is positioned as the SA pilot for NatCap's six-model framing. |
 | Carbon Storage and Sequestration (deeper four-pool) | Listed as additional model for consideration | ✅ SA done (Brief 30, four-pool stock); MN remains single-rate proxy (no NatCap MN four-pool data) |
 | Urban Mental Health model | Listed as additional model for consideration | ✅ Implemented | InVEST UMH v3.19.0; canonical buffer-mean kernel post-Brief B. |
-| PLUS / CLUE / LCM land-use simulation | "Existing models" in NatCap document | 🔵 Considered, deferred — see DESIGN_NOTES §11.1 |
-| ROOT (Restoration Opportunities Optimization Tool) | Mentioned in NatCap document | 🔵 Not pursued for in-app optimization — see DESIGN_NOTES §11.3 |
+| PLUS / CLUE / LCM land-use simulation | "Existing models" in NatCap document | 🟠 PLUS selected for the future-background production branch; Phase 0 not yet run. CLUE is the pilot comparator; LCM is optional. See `PLUS_PRODUCTION_WORKFLOW.md`. |
+| ROOT (Restoration Opportunities Optimization Tool) | Mentioned in NatCap document | 🔵 Deferred to a possible offline second-stage intervention optimizer after the PLUS branch passes validation — see DESIGN_NOTES §11.3 |
 
 ### Inferred priorities
 

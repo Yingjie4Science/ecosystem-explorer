@@ -109,7 +109,7 @@ Where the prototype's canonical-method implementation takes documented shortcuts
 | **Carbon Storage Value SC-CO2 vintage** uses EPA 2023 ($190/t, 2 % discount) — more current than Vibrant Land's IWG 2021 ($53/t, 3 %). Methodology matches; vintage intentionally differs. | EPA 2023 final rule is the more current US-government standard. | DESIGN_NOTES §6.4; NATCAP_COLLABORATION decisions log. |
 | **Food Production** uses a single per-city yield benchmark; NatCap's framework is InVEST Crop Production with per-crop parameterization (`CoSA_Crop_production_ESModeling`). | Per-crop data not yet obtained from NatCap. | NATCAP_COLLABORATION open ask 4a. |
 
-For deferred alternative *approaches* (PLUS / CLUE / LCM land-use simulators, ROOT optimization), see DESIGN_NOTES §11.
+PLUS is now the approved production engine for an offline future-background LULC branch; it has not yet shipped in the app. CLUE remains the pilot comparator, LCM an optional desktop check, and ROOT a possible later intervention-optimization stage. See `PLUS_PRODUCTION_WORKFLOW.md` for the production contract and DESIGN_NOTES §11 for the rationale.
 
 ---
 

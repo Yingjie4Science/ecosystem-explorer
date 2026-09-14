@@ -157,6 +157,15 @@ Planned work that's been scoped but not yet shipped. Not blockers — forward-lo
 - **Optimizer integration:** the selected-area path runs surrogate-shortlist + engine-verify against the composed mask and emits `PROVENANCE_REGION_OPTIMIZED` ("Engine-verified — region-optimized"), distinct from the citywide `PROVENANCE_OPTIMIZER`. See `DESIGN_NOTES.md` §7.3 and `REGION_OPTIMIZER_SPEC.md`.
 - **Still out of scope:** freehand polygons, parcel editing, region-specific lookup tables / region-aware surrogate (the engine integrates over the full raster — see §11 of `ARCHITECTURE.md`).
 
+### 3.2 PLUS future-background production branch
+
+- **Status:** Approved architecture; Phase 0 not yet executed.
+- **Owner:** Spatial-model lead + implementation engineer.
+- **Impact:** Adds conditional future BAU and policy-constrained LULC backgrounds, enabling interventions to be evaluated against plausible future urbanization rather than only the observed baseline.
+- **Ask:** Obtain the author-supported source/release and license artifact; confirm a reproducible headless or controlled-runner interface; inventory three comparable LULC epochs and time-valid drivers for the pilot city.
+
+The full workflow, data contract, validation gates, provenance rules, failure/resume behavior, and phased acceptance criteria live in `PLUS_PRODUCTION_WORKFLOW.md`. The project lead reports direct confirmation from the PLUS lead author that PLUS is open source; until the exact license artifact is attached to a release or repository, record this as personal communication and keep redistribution behind the Phase 0 packaging gate.
+
 ---
 
 ## 4. Deferred briefs
