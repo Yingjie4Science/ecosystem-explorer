@@ -316,6 +316,8 @@ The unified return-dict key `carbon_tons_co2` carries either framing; the city-c
 
 `FOOD_FOREST_LBS_ACRE` is a per-city scalar in `config.py` (MN 11,500; SA 8,500 placeholder). Single-value parameter, not a table. SA value pending NatCap per-crop CoSA numbers — see NATCAP_COLLABORATION ask 4a.
 
+The **offline PLUS demo only** uses `data/sa/food_forest_yield_report_2023.json`, transcribed and visually checked from the user-supplied 2023 project report, Table A2-4. It records crop-specific discounted quarter-acre yields and a narrative/table discrepancy; it does not change the live scalar. Source review, arithmetic decision and permitted claims live in `PLUS_PRODUCTION_WORKFLOW.md` §16.3.
+
 ---
 
 ## 10. Climate / urban-heat-island parameters

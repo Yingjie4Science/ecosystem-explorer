@@ -974,7 +974,7 @@ This section holds **cross-cutting deferred approaches** not owned by any single
 
 **Revisit if.** PLUS cannot be built or automated reproducibly; its hindcast does not outperform persistence and quantity-correct random allocation on change-specific metrics; the applicable license cannot support the intended deployment; or a comparator materially and consistently outperforms it.
 
-**Code touchpoints.** Planned adapter and provenance work only; none has shipped. See `PLUS_PRODUCTION_WORKFLOW.md` §12 and `OPEN_QUESTIONS.md` §3.2.
+**Code touchpoints.** `plus_workflow.py`, `scripts/run_plus_workflow.py`, `scripts/run_canonical_plus_bundle.py`, `scripts/compare_plus_canonical.py`, `tests/test_plus_workflow.py`: runnable offline San Antonio preparation/import/evaluation handoff, an explicitly labeled engineering fixture and independent canonical execution/smoke comparison. Production runner/calibration/release and dashboard integration remain gated. Implementation decisions and demo/source limits live in `PLUS_PRODUCTION_WORKFLOW.md` §16; current blockers in `OPEN_QUESTIONS.md` §3.2.
 
 ### 11.2 Wallpaper approach — interpretation uncertain
 

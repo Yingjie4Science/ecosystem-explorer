@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "source_title": "Vibrant Land: The Benefits of Food Forests and Urban Farms in San Antonio",
+  "source_url": "https://naturalcapitalproject.stanford.edu/sites/default/files/publications/report_-_san_antonio_urban_agriculture_-_2023_final_standard.pdf",
+  "source_pdf_sha256": "6438f509c5ad06e45007482ad40da3a227335195294e213e5e5a105704394935",
+  "source_pages": [52, 53],
+  "source_table": "A2-4",
+  "verified_at": "2026-09-16",
+  "yield_state": "mature benchmark capacity; not observed local production",
+  "equal_crop_area_fraction": 0.25,
+  "commercial_discount_already_applied": 0.25,
+  "crops": [
+    {"crop": "mulberry", "reported_discounted_lbs_quarter_acre_year": 1500},
+    {"crop": "pecan", "reported_discounted_lbs_quarter_acre_year": 188},
+    {"crop": "fig", "reported_discounted_lbs_quarter_acre_year": 2250},
+    {"crop": "nopal", "reported_discounted_lbs_quarter_acre_year": 7500}
+  ],
+  "narrative_lbs_acre_year": 11483,
+  "table_sum_lbs_acre_year": 11438,
+  "discrepancy_lbs_acre_year": 45,
+  "decision": "Use the sum of the four published discounted table entries in the engineering demo. Do not change the dashboard's existing yield scalar. Confirm discrepancy and original crop-specific references with the project team before production use.",
+  "caveats": [
+    "Quarter-acre entries already represent each crop's share of one acre of food forest; do not divide their sum by four again.",
+    "The 25 percent commercial-production discount is already applied; do not apply it twice.",
+    "Uniform site productivity and equal crop shares are scenario assumptions.",
+    "The report describes a roughly 3 to 8 year establishment lag; this benchmark does not model a time trajectory.",
+    "Source references printed in the table have not been independently verified."
+  ]
+}

@@ -1,7 +1,7 @@
 # PLUS Production Workflow
 
 **Audience:** Research, spatial-modeling, and engineering teams
-**Status:** Approved architecture; implementation staged behind Phase 0 gates
+**Status:** Approved architecture; runnable San Antonio engineering handoff/demo implemented; real PLUS runner and calibrated projections remain behind Phase 0 gates
 **Use this for:** Producing future land-use baselines with PLUS and coupling them to Ecosystem Explorer, Urban InVEST, and health/equity analysis
 **Do not use this for:** Current dashboard behavior (→ `ARCHITECTURE.md`), metric definitions (→ `../../REFERENCE.md`), or the rationale for choosing PLUS (→ `DESIGN_NOTES.md` §11.1)
 **Source of truth for:** The proposed PLUS production workflow, its interfaces, validation gates, provenance, and resume behavior
@@ -128,7 +128,7 @@ The adapter, not PLUS-native files, is the boundary consumed by the rest of the 
 
 ### 4.1 Input manifest
 
-The repository will eventually validate this contract in code. Until that implementation lands, every field below is mandatory in the run record.
+The production contract below remains the target for calibrated releases. The runnable v1 engineering handoff (§16) validates grid/classes/transitions/demand and records artifact hashes, but does not yet authorize production releases or implement the complete calibration registry. Its manifest explicitly records these limits.
 
 ```json
 {
@@ -534,3 +534,161 @@ These postponements keep the first implementation auditable and prevent the pred
 - InVEST documentation: <https://storage.googleapis.com/releases.naturalcapitalproject.org/invest-userguide/latest/en/index.html>
 
 Personal communication evidence: the project lead reports direct confirmation from the PLUS lead author that PLUS is open source. Date and correspondence identifier should be added to the run registry when available; do not place private correspondence in the public repository without permission.
+
+---
+
+## 16. Runnable San Antonio demo and handoff
+
+### 16.1 What is implemented
+
+`plus_workflow.py` and `scripts/run_plus_workflow.py` implement an offline, additive workflow. They do not change dashboard equations, the scenario-return contract, or `SCENARIO_SCHEMA_VERSION`. The demo is runnable with the project dependencies in `requirements.txt`:
+
+```bash
+python scripts/run_plus_workflow.py audit
+python scripts/run_plus_workflow.py demo --output outputs/plus_san_antonio_demo
+python scripts/run_plus_workflow.py verify --run outputs/plus_san_antonio_demo
+```
+
+Use a **new output directory** for every run. Existing directories are never overwritten. A failed run has no completed `manifest.json`; retain its files for diagnosis and restart in a new directory. Run products are ignored by git (`outputs/plus_*/`); the code and source record are tracked. The completed example on 2026-09-16 is `outputs/plus_san_antonio_demo_v3/review/report.html`.
+
+The executable chain is:
+
+1. Audit configured San Antonio model inputs and hash them.
+2. Derive a 16-class, one-based NLCD planning raster from the compound baseline. Preserve the original compound source untouched.
+3. Produce explicit class/compound assumptions, restriction raster, allowed-transition edge list, demand template, and historical/engine-record templates.
+4. Import an external PLUS result **or**, in `demo` mode, generate a deterministic growth stress fixture. The latter is distance-to-developed allocation with seed noise; it implements neither LEAS nor CARS and carries engine name `engineering_fixture`.
+5. Reject unknown classes, CRS/grid drift, nodata changes, prohibited transitions, restricted conversions and, for imported PLUS runs, demand-count mismatches.
+6. Preserve unchanged compound NLUD/canopy attributes; expand changed planning classes using an explicit representative-class table. These representatives are **unreviewed scenario assumptions**, not recovered future canopy observations.
+7. Place the same food-forest footprint on both current and background maps.
+8. Reuse the existing Explorer UCM/UNA/UFR/Carbon/UMH functions. Evaluate full-extent HMI and fixed-population-weighted HMI separately. MH contrasts use the explicit paired exposure baseline because the response is nonlinear.
+9. Estimate intervention-only food capacity from the four report crop benchmarks, without claiming citywide net agricultural production.
+10. Write scenario and contrast CSVs, raster views, patch checks, maps, HTML report, four canonical InVEST input bundles, review decision and hashed manifest. Verify saved artifact integrity after completion.
+
+This is a **complete engineering demo from current city inputs to evaluated artifacts**. It is not a completed PLUS calibration, independent canonical-model execution or scientifically validated future forecast. Production release is always `false` in v1, even if approval flags are edited in an imported engine record.
+
+### 16.2 Test experiment and decisions
+
+| Component | Demo choice | Justification / boundary |
+|---|---|---|
+| Geography | Existing San Antonio/Bexar modeled extent, EPSG:5070, 30 m | Reuse the current equal-area model grid; not a city-boundary reproduction |
+| Background | 2,000 grass/shrub/pasture/crop cells become developed low intensity (180 ha) | Stress-test the adapter and downstream sensitivity; not estimated growth demand |
+| Intervention | 1,000 cells (90 ha), food forest | Exercise compound conversion and food/co-benefits together |
+| Placement | Current HMI-ranked, existing convertible developed cells, public ownership classes 1–4; fixed footprint in both backgrounds | Reuse available masks; isolate the background effect from changing intervention location |
+| External constraints | Water, snow/ice and wetlands preserved; only declared transitions allowed | Conservative engineering checks; no claim of approved zoning rules |
+| Food | Report Table A2-4 per-crop discounted yields, equal shares, mature benchmark | Auditable source-derived capacity; no use of the app's unverified SA scalar |
+| Evaluation | Existing model-aligned functions plus canonical input bundles | Fast, consistent demo without duplicating equations; independent canonical execution is still a separate step |
+| Deployment | Offline CLI, no dashboard integration or background upload | Keep calibration work out of live app reruns and avoid changing established UI behavior |
+
+The intervention screen differs from the 2023 project's underutilized-land, ownership and parcel-size filters. In particular, raster public ownership classes 1–4 do not reproduce utility ownership or military/airport exclusions; a 1-acre parcel minimum is not enforced. The demo therefore does not select authoritative project-eligible parcels. The project replication path needs the original parcel/eligibility mask, city boundary and scenario-specific compound views. Do not infer exact parcel eligibility from 30 m cells.
+
+No establishment trajectory is modeled: `--food-establishment-fraction` scales only the food benchmark (0–1); canopy/cooling/carbon retain the selected compound conversion classes, including source canopy tiers preserved by the existing conversion lookup. Mature food productivity and biophysical vegetation growth are not jointly calibrated. `--skip-bundles` is available for rapid engineering runs but omits the canonical handoff files.
+
+### 16.3 Source review from the supplied San Antonio materials
+
+- Public report: [Vibrant Land (2023)](https://naturalcapitalproject.stanford.edu/sites/default/files/publications/report_-_san_antonio_urban_agriculture_-_2023_final_standard.pdf), pp. 48–53. The crop table was visually checked; provenance and numeric transcription are in `data/sa/food_forest_yield_report_2023.json`.
+- Live [model-input readme](https://docs.google.com/document/d/1514Wlu6woL7XUJyeMDsynA7Oh-kBbqrkzST3e2D67Go/edit): read-only text export retrieved on 2026-09-16, SHA256 `a7ba048799da726e65120f414ab7ee7fb311868d84ef63e880f52eb9e841034d`. Its UCM factors/weights/distances, UNA demand/radius/decay and flood rainfall match the selected bundle parameters. Local curated files are reused, not re-downloaded wholesale.
+- [August 2024 data folder](https://drive.google.com/drive/u/1/folders/1FxlHVWFfICc5j-f7z9sWUBrVJj1Lw1zQ) and [crop-model slides](https://docs.google.com/presentation/d/1mLv2fxWPcZOuGOanTHHwfHrIojY8bC8nHh6b9Z-1dRk/edit): links recorded; their full live contents were not inspected because no Drive/Slides connection is available. Do not claim the local corpus is a complete mirror or that the slide model has been reproduced.
+
+Food source discrepancy: the narrative reports approximately 11,483 lb/acre/year, while Table A2-4's discounted quarter-acre values are mulberry 1,500, pecan 188, fig 2,250 and nopal 7,500. Their sum is **11,438**, a difference of 45. The demo uses the explicit table sum and flags reconciliation for the team. The commercial-production discount is already included, and the quarter-acre units already represent each crop's equal share of one acre: neither discounting nor division by four should be repeated. This is a mature, uniform-productivity benchmark. It is not observed food production, complete household nutrition, or total background crop production; crop-production losses from the growth fixture are not estimated. The existing app's SA yield scalar (8,500) is left unchanged pending a separate reviewed output-change decision.
+
+### 16.4 Running real PLUS instead of the fixture
+
+```bash
+python scripts/run_plus_workflow.py prepare --output outputs/plus_sa_preparation
+```
+
+Provide three comparable epochs and time-valid drivers using the generated historical manifest as a checklist. Use the author-supported source build/runner (preferred) or a controlled Windows analyst environment. The official [PLUS repository](https://github.com/HPSCIL/Patch-generating_Land_Use_Simulation_Model) currently documents Windows execution and ships a `.exe`; no verified headless entry point is configured here. Open-source status is accepted from the author's communication; source access/build support is still a practical deployment prerequisite. We do not synthesize an unsupported command line or substitute another CA model under the PLUS name.
+
+The generated CSVs are **project contracts**, not claimed PLUS-native parameter-file formats. Translate them into the version-specific PLUS UI/configuration and archive those exact native settings. Train LEAS on t0→t1, then run CARS for held-out t2. Remap all epochs/output to the declared one-based planning schema and exact reference grid. Retain full native outputs and logs. Evaluate the hindcast before assembling future demand and policy scenarios.
+
+```bash
+python scripts/run_plus_workflow.py hindcast \
+  --current /absolute/path/to/t1_planning.tif \
+  --observed /absolute/path/to/t2_observed_planning.tif \
+  --simulated /absolute/path/to/t2_plus_planning.tif \
+  --output outputs/plus_sa_hindcast_metrics.json
+```
+
+This calculates changed-cell FoM, quantity/allocation disagreement, class precision/recall, persistence and three quantity-correct random comparators. Optional `--restricted` constrains the random comparator; `--clue-raster` adds an independently produced CLUE comparison. No-change FoM is `null`, not a vacuous perfect score. This command is a diagnostic component, not the complete approval gate: transition-specific FoM, spatially blocked analysis, patch similarity, seed ensembles and downstream error still require §6's review.
+
+For future import, fill a copy of `inputs/engine_record.template.json`. Required fields include PLUS version, source/binary SHA256, runner, license-evidence identifier, role, target year, seed, and actual parameter/log/demand file paths. Relative evidence paths resolve against the record's directory. Demand CSV uses `planning_class,target_cells` and must match output class totals exactly. The schema and expansion representatives must match the preparation package; expansion requires analyst review. Native raster/logs/settings/demand are copied into `plus_native/` without modifying their source files.
+
+```bash
+python scripts/run_plus_workflow.py import \
+  --plus-raster /absolute/path/to/plus_future_planning.tif \
+  --engine-record /absolute/path/to/engine_record.json \
+  --output outputs/plus_sa_2030_review
+python scripts/run_plus_workflow.py verify --run outputs/plus_sa_2030_review
+```
+
+Import validates artifact consistency; it cannot establish that the external settings/logs constitute an authentic, well-calibrated run. A completed import stays `external-plus-import-review-pending`, and v1 cannot authorize production use. Manual analyst review of provenance, hindcast and constraints is mandatory.
+
+### 16.5 Acceptance and reproducibility
+
+Fast tests:
+
+```bash
+python -m unittest discover -s tests -p test_plus_workflow.py -v
+python verify_baselines.py
+```
+
+The contract tests include rejected CRS/grid drift, nodata changes, unknown classes, protected conversions, prohibited transitions, missing compound crosswalks, demand mismatch, template engine records, altered artifacts, random-comparator quantities, food units/discounting and deterministic fixture allocation. Full-city demo acceptance requires four evaluated scenarios, identical eligible intervention footprints, zero prohibited/restricted conversions, correct transition areas, manifest hashes and all canonical bundles. The integrity receipt and manifest itself are excluded from the manifest's artifact hash inventory to avoid self-reference.
+
+Runtime tested on 2026-09-16: `snapp` environment (Python 3.11; NumPy 2.4.6; SciPy 1.17.1), with scikit-image 0.26.0, lazy-loader 0.5, imageio 2.37.4 and tifffile 2026.3.3 installed into `/tmp/ecosystem-explorer-demo-deps` only. No existing environment was rewritten. Because this host's environment differs from the project requirements, use the established project environment for normal reproduction; the temporary verification invocation was:
+
+```bash
+PYTHONPATH=/tmp/ecosystem-explorer-demo-deps \
+MPLCONFIGDIR=/tmp/ecosystem-explorer-mpl-cache \
+XDG_CACHE_HOME=/tmp/ecosystem-explorer-cache \
+conda run -n snapp python scripts/run_plus_workflow.py demo \
+  --output outputs/plus_san_antonio_demo_v3
+```
+
+### 16.6 Remaining gates and requests to the research team
+
+1. Obtain the PLUS source/build or controlled runner from the lead author; capture exact version, binary/source hash, native settings and seed behavior. No outbound request is sent automatically.
+2. Supply or approve a comparable three-epoch LULC series and historically valid drivers. The August 2024 curated compound map is a current-condition evaluator input, not three historical epochs.
+3. Approve future class quantities, transition rules and protection masks; demand is currently illustrative.
+4. Supply the original report eligibility/parcels/city boundary if reproducing urban-agriculture project scenarios, including utility ownership and military/airport exclusions.
+5. Reconcile the food-table/narrative discrepancy and review NLUD/canopy expansion assumptions.
+6. Execute independent canonical InVEST runs, validate hindcasts and ensembles, and add defensible heat-health/equity parameters before decision use. Heat-related mortality, irrigation demand, nutrient export and urban-farm scenarios are not included in v1.
+
+The independent canonical smoke executions for all four demo scenarios are now completed (§16.7–16.8); this remaining gate applies to calibrated release-specific scenarios and scientific validation, not to rerunning the same demo just to obtain an execution receipt.
+
+### 16.7 Independent canonical execution and smoke comparison
+
+An optional separate runner executes the exported bundle in an InVEST environment, never in the app's environment. It checks archive paths/symlinks and size before extraction, uses absolute resolved input paths, writes fresh per-model workspaces, and records failures or completion. The engineering manifest is not rewritten or promoted by these sidecar results.
+
+```bash
+conda run -n urban-cooling-invest-3.20.2 python \
+  scripts/run_canonical_plus_bundle.py \
+  --bundle outputs/plus_san_antonio_demo_v3/invest/D_background_food_forest/canonical_invest_bundle.zip \
+  --output outputs/plus_sa_canonical_D_v1
+python scripts/compare_plus_canonical.py \
+  --demo outputs/plus_san_antonio_demo_v3 \
+  --canonical outputs/plus_sa_canonical_D_v1 \
+  --scenario D_background_food_forest
+```
+
+Use another fresh directory for each scenario or rerun. Default execution includes UCM, UFR, Carbon, UNA and UMH depression/anxiety (six executions across five model families); `--models` selects a subset. The smoke comparator requires all six and is verified for **InVEST 3.20.2 only**. It confirms the bundle hash, compares HMI cellwise, flood/access/carbon aggregates and MH native-grid totals, and exits nonzero on disagreement. This adds scenario-specific smoke evidence without changing the existing 3.19.0 baseline parity registry or dashboard badges.
+
+Two engineering lessons from the live run:
+
+- Canonical Carbon's `c_change_bas_alt` is **t C/ha** per its installed model specification. Sum density × 0.09 ha/cell × 44/12 to obtain t CO2; directly summing the raster creates an apparent 11.11-fold mismatch. The comparator includes a unit test for this integration. No model equation was changed.
+- Canonical UMH outputs have a padded native grid (1,733 × 2,004 versus the 1,713 × 1,984 input grid). The comparison sums native case events with an explicit edge/padding caveat rather than resampling counts or claiming cellwise parity. These are synthetic exposure/prevalence case-event proxies, not measured health outcomes.
+
+UNA emitted a NumPy overflow warning during execution; the run completed. Finite, masked output comparisons are checked, and the warning is not treated as empirical validation. The smoke thresholds are HMI MAE ≤1e-4, UFR mean difference ≤1e-4 (including rounded storm/index parameters), UNA share difference ≤0.01 percentage points, Carbon relative tolerance 1e-4 / absolute 0.2 t CO2, and MH native-total tolerance 2% / absolute 0.2 events. Baseline zero-delta matches alone are vacuous; the nonzero B/C/D scenario comparisons provide the useful guards.
+
+### 16.8 Recorded demo results (engineering assumptions only)
+
+The test uses 2,000 background-conversion cells (180 ha) and the same 1,000 intervention cells (90 ha) in B and D. No prohibited/restricted conversions or nodata changes occurred; food-forest compound fallback counts are zero. The artifact-integrity check covers 54 files, excluding the self-referential manifest and verification receipt. All 21 contract tests, all 40 dashboard baselines and associated assertions, all 24 canonical executions and all four input-matched smoke comparisons passed. The demo ran before its implementation commit: the manifest records the base git commit plus exact source-file hashes; those hashes identify the evaluated code rather than implying a clean checkout at run time.
+
+| Contrast | Area-mean HMI delta | Nature access delta (percentage points) | Carbon stock delta (t CO2) | Intervention food capacity (lb/year) | Paired MH proxy events |
+|---|---:|---:|---:|---:|---:|
+| Background C−A | −0.000087589 | −0.003876 | −11,066.7 | 0 (background crop production not assessed) | −25.0 |
+| Current intervention B−A | +0.000208139 | +0.081612 | +33,016.4 | 2,543,752 | +36.4 |
+| Future intervention D−C | +0.000208139 | +0.081619 | +33,016.4 | 2,543,752 | +36.4 |
+
+These tiny full-extent HMI deltas do not describe cooling at the planted cells or constitute observed site temperature changes. The nearly identical intervention contrasts reflect this particular fixed footprint/background fixture, not general robustness to urban growth. The food total is mature benchmark capacity on 90 ha of assumed productive food forest, not assured yield or food-security impact. The crop fraction parameter must not be interpreted as an establishment trajectory for the other models.
+
+Canonical sidecars are stored separately as `outputs/plus_sa_canonical_A_v1/` through `...D_v1/`; each contains `execution_receipt.json`, resolved args, workspaces, native logs and `smoke_comparison.json`. For D, HMI MAE is 8.98e-9; canonical paired carbon is 33,016.425 t CO2 versus Explorer 33,016.4, and paired MH proxy events are 36.416 versus 36.4. The code and docs preserve production release as `false` despite these computational checks. Final test/receipt status should be read directly from the saved artifacts rather than inferred from this narrative.

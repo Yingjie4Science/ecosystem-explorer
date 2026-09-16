@@ -159,10 +159,11 @@ Planned work that's been scoped but not yet shipped. Not blockers — forward-lo
 
 ### 3.2 PLUS future-background production branch
 
-- **Status:** Approved architecture; Phase 0 not yet executed.
+- **Status:** Initial San Antonio data audit and runnable engineering handoff/demo completed; the audit confirms current evaluator inputs, but Phase 0 acceptance remains unmet (no verified PLUS runner or comparable three-epoch/driver series). See `PLUS_PRODUCTION_WORKFLOW.md` §16.
 - **Owner:** Spatial-model lead + implementation engineer.
 - **Impact:** Adds conditional future BAU and policy-constrained LULC backgrounds, enabling interventions to be evaluated against plausible future urbanization rather than only the observed baseline.
 - **Ask:** Obtain the author-supported source/release and license artifact; confirm a reproducible headless or controlled-runner interface; inventory three comparable LULC epochs and time-valid drivers for the pilot city.
+- **Additional source review:** Reconcile the 2023 report's food narrative/table discrepancy, review compound expansion assumptions and provide the original parcel eligibility mask before project replication. Source-derived food capacity is isolated to the demo; the dashboard yield scalar is unchanged.
 
 The full workflow, data contract, validation gates, provenance rules, failure/resume behavior, and phased acceptance criteria live in `PLUS_PRODUCTION_WORKFLOW.md`. The project lead reports direct confirmation from the PLUS lead author that PLUS is open source; until the exact license artifact is attached to a release or repository, record this as personal communication and keep redistribution behind the Phase 0 packaging gate.
 

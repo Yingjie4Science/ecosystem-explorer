@@ -29,6 +29,8 @@ streamlit run app.py
 
 The first run trains the surrogate model (a few seconds) and loads the lookup table; later runs are faster.
 
+**Offline land-change demo (San Antonio):** `python scripts/run_plus_workflow.py demo --output outputs/plus_san_antonio_demo` produces a four-scenario report and canonical InVEST handoff bundles. Its future background is explicitly an engineering fixture, not a PLUS forecast; real PLUS exports can enter through the `import` command. See [the runnable workflow and production gates](docs/internal/PLUS_PRODUCTION_WORKFLOW.md#16-runnable-san-antonio-demo-and-handoff).
+
 ---
 
 ## Start here

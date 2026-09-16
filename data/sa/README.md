@@ -1,5 +1,7 @@
 # San Antonio, TX — Data Setup
 
+> Historical setup scaffold: the checklist below predates the active San Antonio integration and is not current readiness evidence. Use `docs/internal/DATA_INVENTORY.md` and `config.py` for live paths/status. The runnable offline PLUS handoff/demo and its data audit are documented in `docs/internal/PLUS_PRODUCTION_WORKFLOW.md` §16.
+
 Scaffold directory for the second city. The app's `CITIES['San Antonio, TX']` entry
 has `available: False` until the inputs below are in place; once they are, fill in
 the placeholder constants and flip the flag to `True`.
