@@ -21,7 +21,7 @@ For what each number means — and what's *validated* vs *displayed* vs *explora
 ## Running locally
 
 ```bash
-git clone https://github.com/dkwtestacct/ecosystem-explorer.git
+git clone https://github.com/Yingjie4Science/ecosystem-explorer.git
 cd ecosystem-explorer
 pip install -r requirements.txt
 streamlit run app.py
