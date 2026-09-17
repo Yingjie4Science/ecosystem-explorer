@@ -719,3 +719,75 @@ Canonical sidecars are stored separately as `outputs/plus_sa_canonical_A_v1/` th
 6. Maintain separate experiments for land-cover effects under fixed climate/population and joint 2050 climate/population assumptions. Holding current ET, temperatures, storm and population fixed isolates land-cover effects but does not create a complete 2050 health or climate forecast. Historical drivers must be dated to the prediction origin; current road/ownership layers must not leak into a claimed historical hindcast.
 
 **Immediate decisions/access needed:** inspect and identify the exact original-project polygon; intervention eligibility (public/vacant versus broader land); actual area and budget levels, currency/price year, establishment and maintenance horizon; accessible Drive session or equivalent local folder; a compatible Windows runtime for the available PLUS binary. Data acquisition and preparation can proceed independently of the final intervention budget. Native PLUS reproduction, held-out validation and reviewed demand/crosswalks remain mandatory before replacing `engineering_fixture` or claiming production readiness.
+
+### 16.10 Independent Mac-native PLUS-inspired engine v0.1.0
+
+**Status:** runnable experimental software, not official PLUS, not a CARS-equivalent port, not an empirical San Antonio hindcast and not a released 2050 projection. Source implementation is independent; no Niubition source was incorporated. It does not change dashboard equations, baseline data, schema or validation badges. The existing `engineering_fixture` and official-PLUS import contracts are unchanged.
+
+#### Route decision and evidence
+
+The external [Python approximation](https://github.com/Niubition/openplus-landuse-python) was audited at commit `bc5e1d3dfd2c284ecde66c03a962ad3317814738`. Its untruncated tree contains only `.gitignore`, `README.md`, and `openplus.py`: no explicit license, committed tests or environment lock. The script blob matched `1bdb4fc5027b9d3bfaf232ba3bd72a8b520c4aab`. Five manufactured 4×4 probes showed successful basic allocation and repeatability, but success returns with unmet demand under all-locked or zero-suitability inputs, and a truth-selection option returning an earlier demand-violating state. Its source fixes a transition-flow plan, ranks cells sequentially and has a hand-written RF implementation. Those are source observations, not a completed equation-by-equation native PLUS fidelity audit.
+
+**Decision:** implement our own small modular research engine with explicit deviations and contract tests; retain the external approximation as a possible separately identified benchmark. Explicit reuse terms and native-stage agreement could justify revisiting adaptation. No outbound author correspondence was sent and no external source was vendored. The [original PLUS paper](https://doi.org/10.1016/j.compenvurbsys.2020.101569) and [official repository](https://github.com/HPSCIL/Patch-generating_Land_Use_Simulation_Model) establish the LEAS/CARS workflow inspiration, not equivalence of this implementation.
+
+The local data-copy access issue is resolved: the user supplied `data/sa/LULC and Parameters August 2024`. The original AOI, crosswalk and UCM/UNA/Carbon tables matched existing local copies byte-for-byte. Raw downloaded data and ZIP remain local and are not staged for publication. The user has Windows 11 with Codex and is pursuing native PLUS tutorial reproduction there; this Mac session has no connection to that computer.
+
+#### Reader-first reproduction
+
+Use Python 3.11. `requirements-plus-inspired.txt` records the directly tested versions (NumPy 2.4.6, SciPy 1.17.1, Rasterio 1.4.4, scikit-learn 1.9.0); it is not a complete transitive/platform lock. Runtime versions, platform and source hashes are recorded in receipts. Do not rewrite the app's environment to run this branch.
+
+```bash
+python3 -m venv .venv-plus-inspired
+.venv-plus-inspired/bin/python -m pip install -r requirements-plus-inspired.txt
+.venv-plus-inspired/bin/python -m plus_inspired --help
+.venv-plus-inspired/bin/python scripts/run_plus_inspired_demo.py \
+  --output outputs/plus_inspired_example
+.venv-plus-inspired/bin/python -m plus_inspired verify \
+  --run outputs/plus_inspired_example/allocate --check-inputs
+.venv-plus-inspired/bin/python -m unittest discover -s tests \
+  -p test_plus_inspired.py -v
+```
+
+The example generates fresh 64×64 manufactured landscapes, not real city data. It runs all four stages, creates per-stage receipts and verifies input/artifact hashes. It declares `production_release=false`. Its synthetic 2025 reference is only a software fixture. No installation was needed for the development run: the existing `snapp` environment already supplied these dependencies. Windows venv uses `Scripts/python.exe`; Mac execution is the tested platform, not a claim of Windows verification.
+
+For real data, copy/edit the example-generated JSON configurations, preserving all required provenance. Paths resolve relative to the configuration file. Each command requires a fresh output directory:
+
+```bash
+python -m plus_inspired fit --config fit.json --output outputs/plus_fit_v1
+python -m plus_inspired predict --config predict.json --output outputs/plus_predict_v1
+python -m plus_inspired allocate --config allocate.json --output outputs/plus_allocate_v1
+python -m plus_inspired validate --config validate.json --output outputs/plus_validate_v1
+python -m plus_inspired verify --run outputs/plus_allocate_v1 --check-inputs
+```
+
+There is no automatic overwrite/resume. A rejected run preserves its rejection receipt; correct the input and use a fresh directory. Existing outputs remain untouched. Successful receipts include runtime dependencies, platform, configuration, input hashes, exact implementation-file hashes and output hashes. Receipt hashing excludes the receipt itself; integrity checks are not cryptographic authenticity or scientific approval.
+
+#### Configuration and spatial/temporal contracts
+
+Every stage declares `format=plus-inspired-config-v1`, its `command`, ordered integer `classes`, `crs` and an integer `initial` raster. Class 0 is legal; expansion uses −2 for unchanged and −1 for invalid, avoiding conflation with real class codes. Codes are limited to 0…32767, at most 32 classes. All inputs must already be explicitly aligned: one band, exact CRS/affine/width/height. Epochs must have identical valid support. Analysis CRS must be projected in meters and cannot be Web Mercator. The runner does not silently warp/resample anything.
+
+- **fit:** adds `end`, `origin_year`, `end_year`, `dataset_collection`, and ordered `drivers`. Each driver must declare `name`, `path`, integer `year≤origin_year`, and `kind=continuous`; categorical drivers require a future explicit encoder and are rejected in v1. Driver support must cover every valid cell. Optional `seed`, `trees`, `max_samples` set fitting parameters.
+- **predict:** adds `model`, `origin_year`, `dataset_collection`, and drivers with the identical trained feature names/order. Model training end cannot exceed inference origin. Collection and class schema must match. Feature-range exceedance counts are recorded; they are warnings/provenance, not a claim that extrapolation is reliable.
+- **allocate:** adds `origin_year`, `target_year`, `dataset_collection`, binary `editable`, full class-keyed `probabilities` and integer `demand` maps, and a binary `transitions` matrix (rows original/current source, columns final target; diagonal persistence required). Demand totals must equal valid support. Optional seed/neighborhood/patch/stochasticity/batch/round parameters are checked. Probabilities are float [0,1], finite and complete on valid support. Zero suitability forbids expansion but does not forbid existing land persistence. The engine checks locks, transitions, available positive-suitability support and final totals; graph size is bounded to 50,000 edges.
+- **validate:** adds `observed` and `simulated`. These are not accepted by fit, predict or allocate; unknown fields, including `truth`, are rejected. This separation blocks automatic best-iteration selection using final held-out observations, but cannot prove that an analyst did not tune using held-out data elsewhere. Manual temporal metadata is also an assertion, not verification of the source vintage.
+
+The full grid is the simulation domain. This engine does not construct the original AOI polygon or demand allocation to a buffer. Prepare those domains explicitly. Preserve natural/fractional canopy as separate attributes where appropriate; land-class allocation alone does not implement all intervention biophysics.
+
+#### Implemented algorithm and explicit deviations
+
+1. **Expansion labels:** changed cells are labeled by their destination class; unchanged cells are negatives for every class. Invalid cells are excluded.
+2. **LEAS-inspired suitability:** one-vs-rest scikit-learn `RandomForestClassifier`, uniform sampling without replacement (default ≤60,000 cells), 64 trees, max depth 12, minimum leaf 2, square-root feature sampling, one worker and fixed seeds. This uses a standard classifier, not native PLUS's RF backend. If sampling misses a class that has observed expansion, fitting fails and requests a larger sample. A genuinely absent expansion class gets a documented constant-zero model. No balanced sampling, OOB-score claim or probability calibration is silently introduced.
+3. **Persistence-safe storage:** forests are exported to non-executable JSON node arrays, feature order/ranges, training dates, collection and input hashes. Inference validates child indices and values (including rejecting cycles), traverses those trees in chunks and writes unquantized float32 probabilities. No pickle/joblib model loading occurs. Tests compare exported inference against scikit-learn, not against native PLUS.
+4. **Net-change feasibility:** only classes above requested totals supply conversion cells; only classes below totals receive them. Cells are grouped by original source class and positive, allowed target support. A sparse source/group/target linear-flow problem checks spatially constrained capacity and selects integer quotas favoring higher group-average suitability. The network constraint structure is integral; the rounded certificate is explicitly checked. Indirect exchanges through balanced classes and gross turnover at unchanged totals are outside v1: an otherwise possible general land-change scenario can be rejected. This is a purposeful conservative scope limit.
+5. **Patch-aware placement:** within certified groups, candidate score is `p_target × (1 + patch_weight × local_target_fraction) + stochasticity × U(0,1)`. Defaults are odd 3-cell neighborhood, patch weight 1 and stochasticity 0.05. Target processing order is seeded each round; cell-index tie breaks are explicit. A maximum of 128 cells per group/target is assigned each round, with neighborhood fractions refreshed for each target. Certified support prevents capacity dead ends; every cell can change only once. A positive baseline permits spontaneous seeds. This is **not published CARS's exact roulette competition, adaptive inertia or decreasing-threshold mechanism**, nor a byte-identical PLUS patch-growth rule. It must remain named an experimental patch allocator until fidelity work is done.
+6. **Acceptance:** exact final totals, unchanged locked/invalid cells, original-source permitted transitions and complete allocation are mandatory. An iteration limit or infeasible certificate raises an error; CLI exits 2 and retains a rejected receipt, not a successful forecast. Same-environment repeatability is tested; cross-version/platform identical spatial allocation is not established.
+
+The independent design improves verifiability without pretending that new flow/quota rules are fidelity fixes. Before interpreting 2050 outputs, compare this allocation design against native PLUS and alternative placement baselines, and assess whether its minimal net-turnover assumption is scientifically appropriate for San Antonio.
+
+#### Validation and current evidence
+
+The separate validator reports overall accuracy, quantity/allocation disagreement, change Figure of Merit, per-class precision/recall, class confusion matrix, four-connected patch counts and per-transition intersection-over-union. Undefined/no-change denominators become JSON null rather than fabricated perfect scores. It also evaluates persistence using the same masks. Transition IoU is explicitly labeled, not misrepresented as the full multi-class Figure of Merit. Quantity-correct random baselines, expanded patch metrics, spatial-block summaries, uncertainty ensembles and release thresholds remain follow-up work.
+
+The shipped example exercises fitting, future suitability inference, exact allocation, validation and receipt integrity on manufactured data. Contract tests cover repeatability, constraints, infeasibility, zero probability, nodata, class 0/permutations, competing support groups, parameter errors, partial iterations, indirect-exchange scope, JSON forest integrity/inference parity, file-grid/mask/date drift, truth-field rejection, overwrite refusal, artifact tampering and the complete four-stage chain. They are software evidence, not empirical validation. The dashboard's 40-baseline gate remains separate.
+
+**Remaining gates:** Annual NLCD epoch acquisition and time-valid drivers; exact original-project AOI; native Windows tutorial intermediate/final benchmarks; equation-level CARS fidelity decisions; held-out San Antonio hindcast and comparison baselines; large-domain runtime/memory assessment; reviewed 2050 demand and intervention parameters; and an explicitly named adapter into the existing compound/InVEST pipeline. Never fabricate an official-PLUS engine record to import this output. All receipts retain `production_release=false`; no automatic release promotion is implemented.

@@ -1,0 +1,6 @@
+# Tested direct dependency snapshot on macOS / Python 3.11.
+# Not a complete transitive/platform lock; receipts record runtime versions.
+numpy==2.4.6
+scipy==1.17.1
+rasterio==1.4.4
+scikit-learn==1.9.0

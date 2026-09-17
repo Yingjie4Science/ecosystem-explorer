@@ -92,3 +92,5 @@ CLAUDE.md                Operating manual for Claude sessions (repo root)
 ## Status
 
 Prototype, actively developed. The NatCap collaboration is ongoing — see `docs/internal/NATCAP_COLLABORATION.md` for the running log and `docs/internal/OPEN_QUESTIONS.md` for current blockers.
+
+An offline, Mac-native **experimental PLUS-inspired** CLI is available separately from the dashboard and official PLUS. Run `python -m plus_inspired --help`; reproduce the synthetic smoke example with `python scripts/run_plus_inspired_demo.py --output outputs/plus_inspired_example`. See [workflow §16.10](docs/internal/PLUS_PRODUCTION_WORKFLOW.md#1610-independent-mac-native-plus-inspired-engine-v010) for setup, contracts, algorithm decisions and scientific limitations. It is not a calibrated San Antonio 2050 projection.
