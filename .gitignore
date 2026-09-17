@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 outputs/plus_*/
+outputs/nlcd_download_retry_v1/
 .venv/
 venv/
 env/
